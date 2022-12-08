@@ -2,13 +2,9 @@ var express = require('express')
 var app = express()
 var url = require('url');
 var exec = require("child_process").exec
-
 var server_dir = "C:\\FXServer\\server-data";
 var server_file = "pokreni.bat";
-
-var key = "gavran";
 var port = 1337;
-
 app.get("/", function(request, response){ 
 	isRunning('fxserver.exe', (status) => {
 		if (status ==true){
@@ -21,8 +17,6 @@ app.get("/", function(request, response){
 });
 
 app.get("/restart", function(request, response){ 
-	var url_parts = url.parse(request.url, true);
-	var query = url_parts.query;
 		exec("taskkill /IM fxserver.exe /f", (error, stdout, stderr) => { 
 			exec("cd "+server_dir+" && start "+server_file, (error, stdout, stderr) => { 
 				console.log("Restart");
@@ -31,32 +25,23 @@ app.get("/restart", function(request, response){
 		setTimeout(() => {
 			response.redirect('/')
 		  }, 500)
-	
 });
 
 app.get("/start", function(request, response){ 
-	var url_parts = url.parse(request.url, true);
-	var query = url_parts.query;
 	exec("cd "+server_dir+" && C:\\FXServer\\server\\FXServer.exe +exec server.cfg", (error, stdout, stderr) => { 
 		console.log("Started");
 	})
 	response.send("Started");
-	
 });
 
 app.get("/stop", function(request, response){ 
-	var url_parts = url.parse(request.url, true);
-	var query = url_parts.query;
 		exec("taskkill /IM fxserver.exe /f", (error, stdout, stderr) => { 	
 			console.log("Stopped");
 		})
 		setTimeout(() => {
 			response.redirect('/')
 		  }, 500)
-		  
-	
 });
-
 app.listen(port);
 console.log("Web Interface upaljen na portu: "+ port);
 const isRunning = (query, cb) => {
