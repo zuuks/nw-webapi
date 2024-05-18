@@ -2,9 +2,24 @@ var express = require('express')
 var app = express()
 var url = require('url');
 var exec = require("child_process").exec
+var os = require('os');
 var server_dir = "C:\\FXServer\\server-data";
 var server_file = "pokreni.bat";
 var port = 1337;
+
+function getIPAddress() {
+    var interfaces = os.networkInterfaces();
+    for (var devName in interfaces) {
+        var iface = interfaces[devName];
+        for (var i = 0; i < iface.length; i++) {
+            var alias = iface[i];
+            if (alias.family === 'IPv4' && !alias.internal) {
+                return alias.address;
+            }
+        }
+    }
+    return '0.0.0.0';
+}
 app.get("/", function(request, response){ 
 	isRunning('fxserver.exe', (status) => {
 		if (status ==true){
@@ -42,8 +57,10 @@ app.get("/stop", function(request, response){
 			response.redirect('/')
 		  }, 500)
 });
-app.listen(port);
-console.log("Web Interface upaljen na portu: "+ port);
+app.listen(port, () => {
+    const ipAddress = getIPAddress();
+    console.log(`Web Interface upaljen na portu: ${port} (IP: ${ipAddress})`);
+});
 const isRunning = (query, cb) => {
     let platform = process.platform;
     let cmd = '';
